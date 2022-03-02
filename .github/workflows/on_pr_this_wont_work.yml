@@ -1,0 +1,17 @@
+name: Some Examples That Won't Exactly Work 
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  this-will-not-work:
+    runs-on: ubuntu-latest
+    env:
+      GREETEE: Sarah
+    steps:
+      - name: Greeting Fail
+        env:
+          MESSAGE: "Hello ${GREETEE}!"
+        run: echo "${MESSAGE}"

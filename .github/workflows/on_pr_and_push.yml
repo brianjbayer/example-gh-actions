@@ -1,0 +1,67 @@
+name: Example Workflow on PR and Push
+
+# What events trigger this workflow
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# Define Any Workflow Global Variables
+env:
+  GREETEE: "World"
+  GITHUB_REPOSITORY: ${{ github.repository }}:latest
+
+# Define parallel (and file-dependent) jobs
+# Each job can run on a different worker so
+# state is not shared
+jobs:
+
+  greeting:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hello world
+        run: echo "Hello ${GREETEE}!"
+
+  workflow-env-variables:
+    runs-on: ubuntu-latest
+    env:
+      GREETEE: Sarah
+    steps:
+      - name: Hello greeted one
+        run: echo "Hello ${GREETEE}!"
+
+      - name: Greeted local one
+        env:
+          GREETEE: Sailor
+        run: echo "Hello ${GREETEE}!"
+
+  some-info:
+    name: Display some git information
+    runs-on: ubuntu-latest
+    steps:
+      # Use an exiting action (git checkout for source)
+      - uses: actions/checkout@v1
+
+      - name: Git log
+        run: git log
+
+      - name: Show GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
+  dependent-workflow:
+    needs: [greeting, some-info]
+    runs-on: ubuntu-latest
+    env:
+      GREETEE: Bob
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Run a (workflow) script in source code
+        run: ./.github/scripts/greetings-world-script ${GREETEE}
+
+      - name: It has docker
+        run: docker --version

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Exit script on any errors
+set -e
+
+echo "Greetings ${1:-World}!"
